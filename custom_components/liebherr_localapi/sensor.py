@@ -54,6 +54,9 @@ SENSORS: tuple[LiebherrSensorDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=1,
         temperature=True,
+        # The appliance can hold one value for hours; publish every poll so
+        # history and exports (e.g. InfluxDB) show no gaps in the temperature log.
+        force_update=True,
         value_fn=lambda s: dig(s, "temperature", "displayed"),
     ),
     LiebherrSensorDescription(
