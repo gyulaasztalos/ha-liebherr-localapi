@@ -1,0 +1,86 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "The appliance's SmartModule LocalAPI must be activated once via its Wi-Fi onboarding page.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        },
+        "data_description": {
+          "host": "IP address or hostname of the appliance.",
+          "port": "LocalAPI port, 8080 unless changed."
+        }
+      },
+      "reconfigure": {
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot reach the appliance.",
+      "invalid_response": "The appliance answered, but not with LocalAPI data. Is the LocalAPI activated?"
+    },
+    "abort": {
+      "already_configured": "This appliance is already configured.",
+      "reconfigure_successful": "Address updated.",
+      "wrong_appliance": "That address belongs to a different appliance."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "cooling": { "name": "Cooling" },
+      "manual_defrost": { "name": "Manual defrost" },
+      "door_alarm": { "name": "Door alarm" },
+      "upper_temperature_alarm": { "name": "High temperature alarm" },
+      "lower_temperature_alarm": { "name": "Low temperature alarm" },
+      "upper_power_failure_alarm": { "name": "Power failure high temperature alarm" },
+      "lower_power_failure_alarm": { "name": "Power failure low temperature alarm" },
+      "emergency_alarm": { "name": "Emergency mode alarm" },
+      "failure_alarm": { "name": "Failure alarm" },
+      "acoustic_alarm_state": { "name": "Acoustic alarm" },
+      "child_lock_state": { "name": "Child lock" },
+      "supercool_state": { "name": "SuperCool" },
+      "superfrost_state": { "name": "SuperFrost" }
+    },
+    "button": {
+      "confirm_door_alarm": { "name": "Confirm door alarm" },
+      "confirm_upper_temperature_alarm": { "name": "Confirm high temperature alarm" },
+      "confirm_lower_temperature_alarm": { "name": "Confirm low temperature alarm" },
+      "confirm_upper_power_failure_alarm": { "name": "Confirm power failure high temperature alarm" },
+      "confirm_lower_power_failure_alarm": { "name": "Confirm power failure low temperature alarm" },
+      "confirm_emergency_alarm": { "name": "Confirm emergency mode alarm" }
+    },
+    "number": {
+      "target_temperature": { "name": "Target temperature" },
+      "target_humidity": { "name": "Target humidity" },
+      "alarm_refresh_time": { "name": "Temperature alarm repeat time" },
+      "door_alarm_delay": { "name": "Door alarm delay" }
+    },
+    "select": {
+      "eco_mode": {
+        "name": "Eco mode",
+        "state": { "off": "Off", "eco": "Eco", "eco_plus": "Eco plus" }
+      },
+      "humidifier_mode": {
+        "name": "Humidifier",
+        "state": { "off": "Off", "low": "Low", "mid": "Medium", "high": "High" }
+      }
+    },
+    "sensor": {
+      "upper_alarm_threshold": { "name": "High temperature alarm threshold" },
+      "lower_alarm_threshold": { "name": "Low temperature alarm threshold" },
+      "upper_alarm_delay": { "name": "High temperature alarm delay" },
+      "lower_alarm_delay": { "name": "Low temperature alarm delay" },
+      "failure_codes": { "name": "Failure codes" }
+    },
+    "switch": {
+      "acoustic_alarm": { "name": "Acoustic alarm" },
+      "child_lock": { "name": "Child lock" },
+      "supercool": { "name": "SuperCool" },
+      "superfrost": { "name": "SuperFrost" }
+    }
+  }
+}
