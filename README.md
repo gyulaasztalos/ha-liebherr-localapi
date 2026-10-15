@@ -76,6 +76,19 @@ its use. Do not rely on it as your only means of temperature monitoring or
 alarming, for example for HACCP or for medical or laboratory storage. See
 [LICENSE](LICENSE) for the full terms.
 
+## Releasing
+
+HACS offers GitHub releases as updates. To publish one, bump `version` in
+`custom_components/liebherr_localapi/manifest.json`, commit, then push a
+matching tag:
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+The release workflow refuses to publish if the tag doesn't match `manifest.json`.
+
 ## License
 
 [MIT](LICENSE)
