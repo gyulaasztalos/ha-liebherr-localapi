@@ -1,0 +1,56 @@
+{
+  "type": 0,
+  "position": 0,
+  "temperature": {
+    "celsius": {
+      "min": -5,
+      "max": 14
+    },
+    "fahrenheit": {
+      "min": 23,
+      "max": 57
+    }
+  },
+  "caps": {
+    "humidity": 0,
+    "humidityReminder": 0,
+    "superCool": 0,
+    "superFrost": 0,
+    "hydroCool": 0,
+    "powerCool": 0,
+    "varioCool": 0,
+    "bioFresh": 0,
+    "bioFreshPlus": 0,
+    "humidifier": 0,
+    "bottleTimer": 0,
+    "door": 1,
+    "doorLock": 0,
+    "doorAlarm": 1,
+    "autoDoor": 0,
+    "iceCenter": 0,
+    "iceMaker": 0,
+    "upperTemperatureAlarm": 1,
+    "lowerTemperatureAlarm": 1,
+    "upperPowerFailureAlarm": 1,
+    "lowerPowerFailureAlarm": 1,
+    "emergencyAlarm": 1,
+    "smartFrostReminder": 0,
+    "cleaningMode": 0,
+    "defrost": 1,
+    "manualDefrost": 1,
+    "fan": 1,
+    "humidityFan": 1,
+    "light": 1,
+    "airSensor": 1,
+    "desinfection": 0,
+    "evaporatorSensor": 1,
+    "humiditySensor": 0,
+    "waterDispenser": 0,
+    "temperatureCompensationHeater": 0,
+    "temperatureBasedHeater": 0,
+    "setTempSteps": 0,
+    "additionalTemperature": 0,
+    "controllableFan": 0,
+    "coreSensor": 0
+  }
+}

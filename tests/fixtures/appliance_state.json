@@ -1,0 +1,10 @@
+{
+  "state": 4,
+  "temperatureUnit": 0,
+  "acousticAlarm": 1,
+  "childLock": 0,
+  "failureAlarm": {
+    "state": 0,
+    "codes": []
+  }
+}

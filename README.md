@@ -76,6 +76,21 @@ its use. Do not rely on it as your only means of temperature monitoring or
 alarming, for example for HACCP or for medical or laboratory storage. See
 [LICENSE](LICENSE) for the full terms.
 
+## Development
+
+The tests run against a fake appliance built from JSON captured on a real
+BRPSvh 6501 (`tests/fixtures/`, serial numbers replaced), using Home Assistant's
+own test harness:
+
+```bash
+pip install -r requirements_test.txt
+pytest
+```
+
+`pytest-homeassistant-custom-component` pins the Home Assistant version; bump it
+in `requirements_test.txt` to test against a newer release. CI runs Ruff and the
+tests on every push.
+
 ## Releasing
 
 HACS offers GitHub releases as updates. To publish one, bump `version` in

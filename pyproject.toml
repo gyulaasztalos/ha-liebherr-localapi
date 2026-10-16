@@ -9,3 +9,8 @@ ignore = ["E501", "PLR2004", "PLR0913"]
 force-sort-within-sections = true
 known-first-party = ["homeassistant"]
 combine-as-imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

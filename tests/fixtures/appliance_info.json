@@ -1,0 +1,49 @@
+{
+  "name": "BRPSvh 6501",
+  "index": "40C/001",
+  "serialNo": "00.000.000.0",
+  "serviceNo": "0000000-00",
+  "articleNo": "994553903",
+  "configNo": "614842300",
+  "supplierId": 2,
+  "zones": 1,
+  "caps": {
+    "fahrenheit": 1,
+    "cooling": 0,
+    "acousticAlarm": 1,
+    "partyMode": 0,
+    "holidayMode": 0,
+    "energySaverMode": 0,
+    "ecoMode": 0,
+    "sabbathMode": 0,
+    "childLock": 1,
+    "presentationLight": 0,
+    "interiorLight": 0,
+    "moodLight": 0,
+    "gripMoodLight": 0,
+    "nightMode": 0,
+    "dustFilter": 0,
+    "waterFilter": 0,
+    "airFilter": 0,
+    "failureAlarm": 1,
+    "ambientSensor": 1,
+    "compressor": 1,
+    "condenserFan": 1,
+    "coolingSystem": 0,
+    "statusLight": 0,
+    "waterSystem": 0
+  },
+  "cm": {
+    "type": 6,
+    "app": "3.2.4.0",
+    "ident": "00000000-0000-0000-0000-000000000000"
+  },
+  "pb": {
+    "type": 2,
+    "whoami": "TOD 10-0|SW 1-130-6|BUS 1-7-4"
+  },
+  "ui": {
+    "type": 13,
+    "whoami": "TOD 9-800|SW 2-2-0|BUS 1-7-4"
+  }
+}

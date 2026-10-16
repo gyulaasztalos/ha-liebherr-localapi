@@ -1,0 +1,63 @@
+{
+  "state": 1,
+  "temperature": {
+    "displayed": 4.9375,
+    "setpoint": 5,
+    "logging": {
+      "min": -5,
+      "max": 20.75,
+      "duration": 32
+    },
+    "unit": 0,
+    "resolution": 1.0
+  },
+  "door": 0,
+  "doorAlarm": {
+    "state": 0
+  },
+  "temperatureAlarm": {
+    "upper": {
+      "state": 0,
+      "delay": 60,
+      "limit": 8,
+      "temperature": {
+        "value": -55,
+        "unit": 0,
+        "resolution": 1.0
+      }
+    },
+    "lower": {
+      "state": 0,
+      "delay": 60,
+      "limit": 2,
+      "temperature": {
+        "value": 70,
+        "unit": 0,
+        "resolution": 1.0
+      }
+    },
+    "refreshTime": 0
+  },
+  "powerFailureAlarm": {
+    "upper": {
+      "state": 0,
+      "temperature": {
+        "value": -55,
+        "unit": 0,
+        "resolution": 1.0
+      }
+    },
+    "lower": {
+      "state": 0,
+      "temperature": {
+        "value": 70,
+        "unit": 0,
+        "resolution": 1.0
+      }
+    }
+  },
+  "emergencyAlarm": {
+    "state": 0
+  },
+  "manualDefrost": 0
+}
