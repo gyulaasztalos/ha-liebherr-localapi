@@ -2,7 +2,7 @@
 
 > **Unofficial integration.** Not affiliated with or endorsed by Liebherr. See the [disclaimer](#disclaimer).
 
-Local polling integration for Liebherr business fridges and freezers with a
+Local polling integration for Liebherr Professional fridges and freezers with a
 **SmartModule**, using the appliance's own REST API on port 8080. No cloud,
 no SmartMonitoring licence.
 
