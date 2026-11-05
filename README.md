@@ -8,6 +8,21 @@ no SmartMonitoring licence.
 
 Tested with a BRPSvh 6501 (SmartModule firmware 3.2.4.0) on Home Assistant 2026.10.
 
+## Which appliances?
+
+**Only Liebherr Professional appliances with a SmartModule.** The SmartModule is
+built into Perfection models (designation ending in "h") and can be retrofitted to
+Performance models (ending in "g").
+
+This integration does **not** work with:
+
+- **Consumer (household) Liebherr fridges and freezers.** Their SmartDevice has no
+  LocalAPI.
+- **The SmartDevice HomeAPI.** That is Liebherr's cloud API for consumer
+  appliances, used by Home Assistant's built-in
+  [Liebherr integration](https://www.home-assistant.io/integrations/liebherr). If
+  your appliance works with the SmartDevice app, use that integration instead.
+
 ## Activate the LocalAPI (once)
 
 1. On the appliance, switch Wi-Fi **on** (do a Wi-Fi reset if credentials are already set).
@@ -20,9 +35,21 @@ the setpoint, so firewall it so only Home Assistant can reach it.
 
 ## Install
 
-HACS → Custom repositories → add this repository (type *Integration*), install,
-restart Home Assistant, then *Settings → Devices & services → Add integration →
-Liebherr LocalAPI* and enter the appliance's IP.
+The integration is in the default catalog, so there is nothing to add first:
+
+1. **Home Assistant 2026.11 and later:** *Settings → Marketplace*, search for
+   **Liebherr LocalAPI** and install it. **Older versions:** the same search in
+   HACS.
+2. Restart Home Assistant.
+3. *Settings → Devices & services → Add integration → Liebherr LocalAPI*, and enter
+   the appliance's IP address.
+
+[![Open your Home Assistant instance and show this repository.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=gyulaasztalos&repository=ha-liebherr-localapi&category=integration)
+
+**Fallback:** if the search doesn't find it, use the button above to open the
+repository directly. On HACS (before 2026.11) you can instead add
+`https://github.com/gyulaasztalos/ha-liebherr-localapi` as a custom repository
+(type *Integration*). Then install it and continue from step 2.
 
 ## What you get
 
