@@ -6,7 +6,9 @@ Local polling integration for Liebherr Professional fridges and freezers with a
 **SmartModule**, using the appliance's own REST API on port 8080. No cloud,
 no SmartMonitoring licence.
 
-Tested with a BRPSvh 6501 (SmartModule firmware 3.2.4.0) on Home Assistant 2026.10.
+Developed against a BRPSvh 6501 (SmartModule firmware 3.2.4.0). Every change is
+tested in CI against the Home Assistant release pinned in `requirements_test.txt`,
+which Renovate keeps current; the oldest supported version is in `hacs.json`.
 
 ## Which appliances?
 
@@ -120,16 +122,17 @@ tests on every push.
 
 ## Releasing
 
-HACS offers GitHub releases as updates. To publish one, bump `version` in
-`custom_components/liebherr_localapi/manifest.json`, commit, then push a
-matching tag:
+Releases are automatic. When a merged pull request changes `custom_components/`,
+`README.md` or `hacs.json`, the auto-release workflow waits for Validate and Tests
+to pass on the merge, bumps the patch version in `manifest.json`, then tags and
+publishes the release. The release notes list the commits since the previous
+release. Pull requests that only touch CI or tests don't produce a release.
 
-```bash
-git tag v1.0.1
-git push origin v1.0.1
-```
+To release a minor or major version, set `version` in `manifest.json` by hand in
+the pull request; the workflow releases that version instead of bumping.
 
-The release workflow refuses to publish if the tag doesn't match `manifest.json`.
+Tags pushed by hand still work: the release workflow publishes them, and refuses
+a tag that doesn't match `manifest.json`.
 
 ## License
 
