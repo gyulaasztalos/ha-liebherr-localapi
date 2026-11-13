@@ -1,2 +1,2 @@
-# Pins Home Assistant itself (0.13.372 -> homeassistant==2026.10.1); bump together
+# Pins the Home Assistant version the tests run against; Renovate keeps it current
 pytest-homeassistant-custom-component==0.13.375

@@ -69,7 +69,7 @@ firmware update to pick up new routes.
 | number | target temperature, target humidity, temperature alarm repeat time, door alarm delay |
 | switch | acoustic alarm, child lock, SuperCool, SuperFrost |
 | select | eco mode, humidifier mode |
-| button | confirm door / temperature / power-failure / emergency alarm |
+| button | confirm door / temperature / power-failure / emergency alarm; pressing one with no unconfirmed alarm does nothing |
 
 *Door alarm delay* is write-only in the API. The entity shows the last value set
 from Home Assistant and is unknown until set once.
