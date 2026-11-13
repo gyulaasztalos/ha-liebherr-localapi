@@ -169,18 +169,62 @@ async def test_acoustic_alarm_switch(
     ]
 
 
-@pytest.mark.usefixtures("setup_integration")
 async def test_confirm_alarm_button(
-    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    appliance: FakeAppliance,
+    serve,
+    config_entry: MockConfigEntry,
 ) -> None:
     """Confirm buttons send DELETE to the alarm route."""
+    appliance.zone_state["powerFailureAlarm"]["upper"]["state"] = 1
+    serve()
+    config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
     await hass.services.async_call(
         "button",
         "press",
-        {ATTR_ENTITY_ID: f"button.{PREFIX}_confirm_door_alarm"},
+        {
+            ATTR_ENTITY_ID: f"button.{PREFIX}_confirm_power_failure_high_temperature_alarm"
+        },
         blocking=True,
     )
-    assert len(_calls(aioclient_mock, "DELETE", "zones/0/door/alarm")) == 1
+    calls = _calls(aioclient_mock, "DELETE", "zones/0/alarm/power-failure-alarm/upper")
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize(
+    "alarm_state", [0, 2], ids=["no-active-alarm", "already-confirmed"]
+)
+@pytest.mark.usefixtures("setup_integration")
+async def test_confirm_without_unconfirmed_alarm_is_a_no_op(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    appliance: FakeAppliance,
+    serve,
+    *,
+    freezer: FrozenDateTimeFactory,
+    alarm_state: int,
+) -> None:
+    """With nothing to confirm, the press succeeds but nothing is sent.
+
+    Confirming an alarm that has already cleared makes the appliance report it as
+    active and confirmed again until its next state update.
+    """
+    entity_id = f"button.{PREFIX}_confirm_power_failure_high_temperature_alarm"
+    appliance.zone_state["powerFailureAlarm"]["upper"]["state"] = alarm_state
+    serve()
+    await _poll(hass, freezer)
+    assert hass.states.get(entity_id).state != STATE_UNAVAILABLE
+
+    await hass.services.async_call(
+        "button", "press", {ATTR_ENTITY_ID: entity_id}, blocking=True
+    )
+    assert not _calls(
+        aioclient_mock, "DELETE", "zones/0/alarm/power-failure-alarm/upper"
+    )
 
 
 async def test_rejected_write_raises(
