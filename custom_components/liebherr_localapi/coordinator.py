@@ -50,6 +50,8 @@ class LiebherrCoordinator(DataUpdateCoordinator[LiebherrData]):
         self.info: dict[str, Any] = {}
         self.zone_info: dict[int, dict[str, Any]] = {}
         self.routes: set[tuple[str, str]] = set()
+        # Registry id of the appliance device, the parent of the zone devices
+        self.device_id: str | None = None
 
     async def _async_setup(self) -> None:
         """Read identity, zone ranges and the routes this firmware serves."""

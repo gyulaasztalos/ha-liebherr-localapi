@@ -21,7 +21,8 @@ uv venv --python 3.14 .venv && VIRTUAL_ENV=.venv uv pip install -r requirements_
 .venv/bin/ruff format custom_components tests               # CI runs --check
 ```
 
-CI (`.github/workflows/`): `tests.yml` (Ruff + pytest), `validate.yml` (`hacs/action`
+CI (`.github/workflows/`): `tests.yml` (Ruff, pytest, and Breakage Radar for HA APIs
+scheduled for removal, pinned rules, any finding fails), `validate.yml` (`hacs/action`
 with no `ignore`, plus hassfest). Both must pass: the catalog requires them.
 hassfest only runs in CI (it needs an HA core checkout).
 
@@ -41,8 +42,10 @@ under HACCP. Read freely, and never PUT/DELETE against it without the owner's go
   a control request and requests a refresh. Info and routes only refresh on reload, so
   firmware updates need an integration reload.
 - **`entity.py`**: a device per appliance (serial number = identifier), plus one
-  sub-device per zone only for multi-zone appliances. `supported(cap, state_key)` is
-  **cap flag == 1 OR field present in state**, because the caps under-report.
+  child device per zone only for multi-zone appliances (`ChildDeviceInfo`, HA ≥
+  2026.9; the parent is `coordinator.device_id`, registered first in
+  `async_setup_entry`). `supported(cap, state_key)` is **cap flag == 1 OR field
+  present in state**, because the caps under-report.
 - **Platforms are description-driven.** A **control** (switch/number/select/button) is
   created only if `supported(...)` **and** its route is in `coordinator.routes`. Where
   the state field exists but the route doesn't, `binary_sensor.py` creates a read-only

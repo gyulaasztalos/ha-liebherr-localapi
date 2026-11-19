@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.device_registry import ChildDeviceInfo, DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, ZONE_POSITIONS
@@ -34,20 +34,26 @@ def appliance_device(coordinator: LiebherrCoordinator) -> DeviceInfo:
     )
 
 
-def zone_device(coordinator: LiebherrCoordinator, zone: int) -> DeviceInfo:
-    """Device for a zone; single-zone appliances use the appliance device."""
+def zone_device(
+    coordinator: LiebherrCoordinator, zone: int
+) -> DeviceInfo | ChildDeviceInfo:
+    """Device for a zone; single-zone appliances use the appliance device.
+
+    A zone of a multi-zone appliance is a child device of the appliance. Home
+    Assistant converts a zone device registered by an older version (a full
+    device linked with via_device) into a child device, keeping its id.
+    """
     if len(coordinator.zone_info) == 1:
         return appliance_device(coordinator)
+    assert coordinator.device_id is not None  # set in async_setup_entry
     info = coordinator.info
     position = ZONE_POSITIONS.get(
         coordinator.zone_info[zone].get("position"), str(zone)
     )
-    return DeviceInfo(
+    return ChildDeviceInfo(
         identifiers={(DOMAIN, f"{info['serialNo']}_zone{zone}")},
-        manufacturer="Liebherr",
-        model=info.get("name"),
-        name=f"Liebherr {info.get('name', '')} {position} zone",
-        via_device=(DOMAIN, info["serialNo"]),
+        name=f"{position.capitalize()} zone",
+        parent_device_id=coordinator.device_id,
     )
 
 

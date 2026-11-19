@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import copy
+
 import aiohttp
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.test_util.aiohttp import (
@@ -133,3 +135,91 @@ async def test_feature_rich_appliance_entities(
 
     assert hass.states.get("switch.liebherr_brpsvh_6501_supercool").state == "on"
     assert hass.states.get("select.liebherr_brpsvh_6501_eco_mode").state == "eco_plus"
+
+
+def _two_zone(appliance: FakeAppliance) -> None:
+    """Give the appliance a bottom zone next to its top zone."""
+    bottom_info = copy.deepcopy(appliance.zone_info)
+    bottom_info["position"] = 1
+    appliance.extra_zones.append((bottom_info, copy.deepcopy(appliance.zone_state)))
+
+
+async def test_multi_zone_child_devices(
+    hass: HomeAssistant,
+    appliance: FakeAppliance,
+    config_entry: MockConfigEntry,
+    serve,
+) -> None:
+    """Each zone of a multi-zone appliance is a child device of the appliance."""
+    _two_zone(appliance)
+    serve()
+
+    config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    registry = dr.async_get(hass)
+    (parent,) = dr.async_entries_for_config_entry(registry, config_entry.entry_id)
+    assert parent.identifiers == {(DOMAIN, SERIAL)}
+    children = dr.async_entries_for_parent_device(registry, parent.id)
+    assert {(c.name, frozenset(c.identifiers)) for c in children} == {
+        ("Top zone", frozenset({(DOMAIN, f"{SERIAL}_zone0")})),
+        (
+            "Bottom zone",
+            frozenset({(DOMAIN, f"{SERIAL}_zone1")}),
+        ),
+    }
+
+    bottom = registry.async_get_child_device_by_identifier(
+        (DOMAIN, f"{SERIAL}_zone1"), config_entry.entry_id
+    )
+    temperature = er.async_get(hass).async_get(
+        "sensor.liebherr_brpsvh_6501_bottom_zone_temperature"
+    )
+    assert temperature.device_id == bottom.id
+    # Appliance-level entities stay on the appliance device
+    door = er.async_get(hass).async_get("switch.liebherr_brpsvh_6501_acoustic_alarm")
+    assert door.device_id == parent.id
+
+
+async def test_zone_devices_become_child_devices(
+    hass: HomeAssistant,
+    appliance: FakeAppliance,
+    config_entry: MockConfigEntry,
+    serve,
+) -> None:
+    """Zone devices of an earlier version turn into child devices, keeping their id."""
+    _two_zone(appliance)
+    serve()
+    config_entry.add_to_hass(hass)
+
+    # What earlier versions registered: full zone devices linked to the appliance
+    registry = dr.async_get(hass)
+    parent = registry.async_get_or_create(
+        config_entry_id=config_entry.entry_id, identifiers={(DOMAIN, SERIAL)}
+    )
+    old_zone_ids = {
+        zone: registry.async_get_or_create(
+            config_entry_id=config_entry.entry_id,
+            identifiers={(DOMAIN, f"{SERIAL}_zone{zone}")},
+            manufacturer="Liebherr",
+            via_device_id=parent.id,
+        ).id
+        for zone in (0, 1)
+    }
+    # Those came from an earlier run, as after a restart, not from this setup
+    registry.async_config_entry_unloaded(config_entry.entry_id)
+
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert config_entry.state is ConfigEntryState.LOADED
+
+    assert dr.async_entries_for_config_entry(registry, config_entry.entry_id) == [
+        registry.async_get(parent.id)
+    ]
+    for zone, device_id in old_zone_ids.items():
+        child = registry.async_get_child_device_by_identifier(
+            (DOMAIN, f"{SERIAL}_zone{zone}"), config_entry.entry_id
+        )
+        assert child.id == device_id
+        assert child.parent_device_id == parent.id

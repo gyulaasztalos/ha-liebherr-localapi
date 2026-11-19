@@ -33,3 +33,19 @@ jobs:
           cache-dependency-path: requirements_test.txt
       - run: pip install -r requirements_test.txt
       - run: pytest -p no:cacheprovider
+
+  # Home Assistant APIs scheduled for removal. Pinned rules (no network), so only
+  # a Renovate bump of the action brings in new removals, and that PR goes red
+  # instead of an unrelated one.
+  breakage-radar:
+    name: Breakage Radar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # Third-party action, so pinned by commit; Renovate updates SHA and comment
+      - uses: Booyaka101/hass-breakage-radar@23777df610d402448e977a92401dc2bb6c663208 # v1.19.0
+        with:
+          fail-on: any
+          python-version: "3.15"

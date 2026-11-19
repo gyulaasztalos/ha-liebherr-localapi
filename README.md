@@ -55,7 +55,8 @@ repository directly. On HACS (before 2026.11) you can instead add
 
 ## What you get
 
-One device per appliance. Multi-zone appliances get one extra device per zone.
+One device per appliance. On multi-zone appliances each zone is a child device
+of it (*Top zone*, *Bottom zone*). Requires Home Assistant 2026.9 or later.
 
 Entities are created from the appliance's capability flags **and** the routes
 its firmware actually serves (probed with `OPTIONS` at setup). A feature shows

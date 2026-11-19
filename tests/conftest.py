@@ -64,6 +64,10 @@ class FakeAppliance:
     zone_info: dict[str, Any]
     zone_state: dict[str, Any]
     routes: set[tuple[str, str]] = field(default_factory=lambda: set(REAL_ROUTES))
+    # (info, state) of zones 1, 2, ...; their control routes all return 404
+    extra_zones: list[tuple[dict[str, Any], dict[str, Any]]] = field(
+        default_factory=list
+    )
     write_status: int = 200
     state_status: int = 200
 
@@ -91,17 +95,22 @@ def serve(aioclient_mock: AiohttpClientMocker, appliance: FakeAppliance):
     def _serve() -> None:
         aioclient_mock.clear_requests()
         state_kwargs: dict[str, Any] = {"status": appliance.state_status}
+        zones = [(appliance.zone_info, appliance.zone_state), *appliance.extra_zones]
+        appliance.info["zones"] = len(zones)
         aioclient_mock.get(f"{BASE_URL}/appliance/info", json=appliance.info)
-        aioclient_mock.get(f"{BASE_URL}/zones/0/info", json=appliance.zone_info)
         aioclient_mock.get(
             f"{BASE_URL}/appliance/state", json=appliance.state, **state_kwargs
         )
-        aioclient_mock.get(
-            f"{BASE_URL}/zones/0/state", json=appliance.zone_state, **state_kwargs
-        )
+        for zone, (zone_info, zone_state) in enumerate(zones):
+            aioclient_mock.get(f"{BASE_URL}/zones/{zone}/info", json=zone_info)
+            aioclient_mock.get(
+                f"{BASE_URL}/zones/{zone}/state", json=zone_state, **state_kwargs
+            )
 
         candidates = {path for _, path in APPLIANCE_ROUTES} | {
-            path.format(zone=0) for _, path in ZONE_ROUTES
+            path.format(zone=zone)
+            for zone in range(len(zones))
+            for _, path in ZONE_ROUTES
         }
         for path in sorted(candidates):
             methods = sorted(m for m, p in appliance.routes if p == path)
