@@ -30,9 +30,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: LiebherrConfigEntry) -> 
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
 
-    # Register the appliance first so zone devices can reference it via_device
-    dr.async_get(hass).async_get_or_create(
-        config_entry_id=entry.entry_id, **appliance_device(coordinator)
+    # Register the appliance first: zone devices are its child devices, and a
+    # parent must exist before its children
+    coordinator.device_id = (
+        dr.async_get(hass)
+        .async_get_or_create(
+            config_entry_id=entry.entry_id, **appliance_device(coordinator)
+        )
+        .id
     )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
