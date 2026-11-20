@@ -28,7 +28,8 @@ class LiebherrBinarySensorDescription(BinarySensorEntityDescription):
 
     zone: bool
     cap: str | None = None
-    state_key: str | None = None
+    # Top-level field or path whose presence marks the feature as supported
+    state_key: str | tuple[str, ...] | None = None
     value_fn: Callable[[dict[str, Any]], Any]
     # Alarms report whether they have been confirmed on the appliance
     alarm_path: tuple[str, ...] | None = None
@@ -42,6 +43,7 @@ def _alarm(key: str, *path: str, cap: str, zone: bool = True):
         translation_key=key,
         zone=zone,
         cap=cap,
+        state_key=path,
         device_class=BinarySensorDeviceClass.PROBLEM,
         alarm_path=path,
         value_fn=lambda s: (dig(s, *path) or 0) != 0,

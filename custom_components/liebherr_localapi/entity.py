@@ -47,12 +47,11 @@ def zone_device(
         return appliance_device(coordinator)
     assert coordinator.device_id is not None  # set in async_setup_entry
     info = coordinator.info
-    position = ZONE_POSITIONS.get(
-        coordinator.zone_info[zone].get("position"), str(zone)
-    )
+    position = ZONE_POSITIONS.get(coordinator.zone_info[zone].get("position"))
     return ChildDeviceInfo(
         identifiers={(DOMAIN, f"{info['serialNo']}_zone{zone}")},
-        name=f"{position.capitalize()} zone",
+        # Zone number as in the API (and in unique ids) for unknown positions
+        name=f"{position.capitalize()} zone" if position else f"Zone {zone}",
         parent_device_id=coordinator.device_id,
     )
 
@@ -92,11 +91,12 @@ def supported(
     coordinator: LiebherrCoordinator,
     zone: int | None,
     cap: str | None,
-    state_key: str | None,
+    state_key: str | tuple[str, ...] | None,
 ) -> bool:
     """Whether a feature exists: capability flag set, or field present in state.
 
     Both are checked because the capability flags under-report on some firmware.
+    `state_key` is a top-level field or a path into nested state.
     """
     caps = (
         coordinator.info.get("caps", {})
@@ -105,5 +105,9 @@ def supported(
     )
     if cap and caps.get(cap) == 1:
         return True
+    if not state_key:
+        return False
+    *parents, leaf = (state_key,) if isinstance(state_key, str) else state_key
     data = coordinator.data.appliance if zone is None else coordinator.data.zones[zone]
-    return bool(state_key) and state_key in data
+    parent = dig(data, *parents)
+    return isinstance(parent, dict) and leaf in parent

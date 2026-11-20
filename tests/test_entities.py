@@ -134,6 +134,29 @@ async def test_set_target_temperature(
     assert _calls(aioclient_mock, "PUT", "zones/0/temperature") == [{"value": 6}]
 
 
+async def test_target_temperature_default_range_in_fahrenheit(
+    hass: HomeAssistant,
+    appliance: FakeAppliance,
+    config_entry: MockConfigEntry,
+    serve,
+) -> None:
+    """Without a Fahrenheit range, the default range is still -30..30 °C."""
+    del appliance.zone_info["temperature"]["fahrenheit"]
+    appliance.zone_state["temperature"]["unit"] = 1
+    appliance.zone_state["temperature"]["setpoint"] = 41
+    serve()
+
+    config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    # Shown in the metric test instance's °C
+    state = hass.states.get(f"number.{PREFIX}_target_temperature")
+    assert state.attributes["min"] == pytest.approx(-30)
+    assert state.attributes["max"] == pytest.approx(30)
+    assert float(state.state) == pytest.approx(5)
+
+
 @pytest.mark.usefixtures("setup_integration")
 async def test_door_alarm_delay_written_and_shown(
     hass: HomeAssistant, aioclient_mock: AiohttpClientMocker

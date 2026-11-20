@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 
 from .coordinator import LiebherrConfigEntry
 
-TO_REDACT = {"serialNo", "ident"}
+TO_REDACT = {"serialNo", "serviceNo", "ident"}
 
 
 async def async_get_config_entry_diagnostics(

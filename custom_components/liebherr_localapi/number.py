@@ -24,6 +24,11 @@ TEMPERATURE_PATH = "zones/{zone}/temperature"
 HUMIDITY_PATH = "zones/{zone}/humidity"
 REFRESH_TIME_PATH = "zones/{zone}/temperature/alarm/refresh-time"
 DOOR_ALARM_DELAY_PATH = "zones/{zone}/door/alarm/delay"
+# Setpoint range when the zone description gives none: -30..30 °C either way
+DEFAULT_RANGE = {
+    "celsius": {"min": -30, "max": 30},
+    "fahrenheit": {"min": -22, "max": 86},
+}
 
 
 async def async_setup_entry(
@@ -43,12 +48,19 @@ async def async_setup_entry(
             entities.append(TargetTemperature(coordinator, zone))
         if has(HUMIDITY_PATH) and supported(coordinator, zone, "humidity", None):
             entities.append(TargetHumidity(coordinator, zone))
-        if has(REFRESH_TIME_PATH) and supported(
-            coordinator, zone, "upperTemperatureAlarm", None
+        # The refresh time applies to both temperature alarms
+        if has(REFRESH_TIME_PATH) and (
+            supported(
+                coordinator,
+                zone,
+                "upperTemperatureAlarm",
+                ("temperatureAlarm", "refreshTime"),
+            )
+            or supported(coordinator, zone, "lowerTemperatureAlarm", None)
         ):
             entities.append(AlarmRefreshTime(coordinator, zone))
         if has(DOOR_ALARM_DELAY_PATH) and supported(
-            coordinator, zone, "doorAlarm", None
+            coordinator, zone, "doorAlarm", "doorAlarm"
         ):
             entities.append(DoorAlarmDelay(coordinator, zone))
     async_add_entities(entities)
@@ -78,21 +90,21 @@ class TargetTemperature(LiebherrEntity, NumberEntity):
             else UnitOfTemperature.CELSIUS
         )
 
-    def _range(self, bound: str) -> float | None:
+    def _range(self, bound: str) -> float:
+        """Bound from the zone description, or a wide default in the same unit."""
         unit = "fahrenheit" if self._fahrenheit else "celsius"
-        return dig(self.coordinator.zone_info[self.zone], "temperature", unit, bound)
+        value = dig(self.coordinator.zone_info[self.zone], "temperature", unit, bound)
+        return DEFAULT_RANGE[unit][bound] if value is None else value
 
     @property
     def native_min_value(self) -> float:
         """Lowest settable temperature."""
-        value = self._range("min")
-        return -30 if value is None else value
+        return self._range("min")
 
     @property
     def native_max_value(self) -> float:
         """Highest settable temperature."""
-        value = self._range("max")
-        return 30 if value is None else value
+        return self._range("max")
 
     @property
     def native_step(self) -> float:

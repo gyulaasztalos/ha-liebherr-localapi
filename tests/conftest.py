@@ -70,6 +70,8 @@ class FakeAppliance:
     )
     write_status: int = 200
     state_status: int = 200
+    # Answer to OPTIONS on the routes in `routes`
+    probe_status: int = 200
 
 
 @pytest.fixture(autouse=True)
@@ -117,6 +119,7 @@ def serve(aioclient_mock: AiohttpClientMocker, appliance: FakeAppliance):
             if methods:
                 aioclient_mock.options(
                     f"{BASE_URL}/{path}",
+                    status=appliance.probe_status,
                     headers={"Allow": ",".join([*methods, "OPTIONS"])},
                 )
                 for method in methods:

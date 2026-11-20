@@ -84,7 +84,7 @@ async def async_setup_entry(
         LiebherrButton(coordinator, description, zone)
         for description in BUTTONS
         for zone in coordinator.zone_info
-        if supported(coordinator, zone, description.cap, None)
+        if supported(coordinator, zone, description.cap, description.state_path)
         and coordinator.has_route("DELETE", description.path.format(zone=zone))
     )
 

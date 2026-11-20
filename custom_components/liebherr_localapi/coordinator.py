@@ -57,6 +57,8 @@ class LiebherrCoordinator(DataUpdateCoordinator[LiebherrData]):
         """Read identity, zone ranges and the routes this firmware serves."""
         try:
             self.info = await self.client.appliance_info()
+            if not self.info.get("serialNo"):
+                raise LiebherrError("GET /appliance/info: no serial number")
             zones = self.info.get("zones", 1)
             zone_count = len(zones) if isinstance(zones, list) else int(zones)
             for zone in range(zone_count):
