@@ -13,10 +13,11 @@ from homeassistant.core import HomeAssistant
 async def test_diagnostics_redacts_identity(
     hass: HomeAssistant, setup_integration: MockConfigEntry
 ) -> None:
-    """Diagnostics keep the raw documents but hide serial and module id."""
+    """Diagnostics keep the raw documents but hide serial, service and module ids."""
     diagnostics = await async_get_config_entry_diagnostics(hass, setup_integration)
 
     assert diagnostics["info"]["serialNo"] == "**REDACTED**"
+    assert diagnostics["info"]["serviceNo"] == "**REDACTED**"
     assert diagnostics["info"]["cm"]["ident"] == "**REDACTED**"
     assert diagnostics["info"]["name"] == "BRPSvh 6501"
     assert "PUT /zones/0/temperature" in diagnostics["routes"]

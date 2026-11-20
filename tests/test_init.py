@@ -92,6 +92,38 @@ async def test_setup_retries_when_unreachable(
     assert config_entry.state is ConfigEntryState.SETUP_RETRY
 
 
+async def test_setup_retries_when_route_probe_fails(
+    hass: HomeAssistant,
+    appliance: FakeAppliance,
+    config_entry: MockConfigEntry,
+    serve,
+) -> None:
+    """An appliance error while probing routes retries setup, not drops controls."""
+    appliance.probe_status = 504
+    serve()
+    config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert config_entry.state is ConfigEntryState.SETUP_RETRY
+
+
+async def test_setup_retries_without_serial_number(
+    hass: HomeAssistant,
+    appliance: FakeAppliance,
+    config_entry: MockConfigEntry,
+    serve,
+) -> None:
+    """An appliance description without a serial number is not set up."""
+    del appliance.info["serialNo"]
+    serve()
+    config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert config_entry.state is ConfigEntryState.SETUP_RETRY
+
+
 async def test_real_appliance_entities(
     hass: HomeAssistant, setup_integration: MockConfigEntry
 ) -> None:
@@ -137,6 +169,55 @@ async def test_feature_rich_appliance_entities(
     assert hass.states.get("select.liebherr_brpsvh_6501_eco_mode").state == "eco_plus"
 
 
+async def test_alarms_follow_state_when_caps_under_report(
+    hass: HomeAssistant,
+    appliance: FakeAppliance,
+    config_entry: MockConfigEntry,
+    serve,
+) -> None:
+    """An alarm in the zone state counts as supported even with its cap at 0."""
+    caps = appliance.zone_info["caps"]
+    caps["emergencyAlarm"] = 0
+    caps["doorAlarm"] = 0
+    # Upper alarm: cap 0 and no state field, so it is really not there
+    caps["upperTemperatureAlarm"] = 0
+    del appliance.zone_state["temperatureAlarm"]["upper"]
+    serve()
+
+    config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    entities = _entity_ids(hass, config_entry)
+    assert "binary_sensor.liebherr_brpsvh_6501_emergency_mode_alarm" in entities
+    assert "button.liebherr_brpsvh_6501_confirm_emergency_mode_alarm" in entities
+    assert "binary_sensor.liebherr_brpsvh_6501_door_alarm" in entities
+    assert "number.liebherr_brpsvh_6501_door_alarm_delay" in entities
+    assert "binary_sensor.liebherr_brpsvh_6501_high_temperature_alarm" not in entities
+    assert "button.liebherr_brpsvh_6501_confirm_high_temperature_alarm" not in entities
+
+
+async def test_refresh_time_with_lower_alarm_only(
+    hass: HomeAssistant,
+    appliance: FakeAppliance,
+    config_entry: MockConfigEntry,
+    serve,
+) -> None:
+    """The alarm refresh time also applies to a zone with only a low alarm."""
+    appliance.zone_info["caps"]["upperTemperatureAlarm"] = 0
+    del appliance.zone_state["temperatureAlarm"]["upper"]
+    del appliance.zone_state["temperatureAlarm"]["refreshTime"]
+    serve()
+
+    config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert "number.liebherr_brpsvh_6501_temperature_alarm_repeat_time" in (
+        _entity_ids(hass, config_entry)
+    )
+
+
 def _two_zone(appliance: FakeAppliance) -> None:
     """Give the appliance a bottom zone next to its top zone."""
     bottom_info = copy.deepcopy(appliance.zone_info)
@@ -180,6 +261,27 @@ async def test_multi_zone_child_devices(
     # Appliance-level entities stay on the appliance device
     door = er.async_get(hass).async_get("switch.liebherr_brpsvh_6501_acoustic_alarm")
     assert door.device_id == parent.id
+
+
+async def test_zone_with_unknown_position(
+    hass: HomeAssistant,
+    appliance: FakeAppliance,
+    config_entry: MockConfigEntry,
+    serve,
+) -> None:
+    """A zone in a position the integration does not know is named by number."""
+    _two_zone(appliance)
+    appliance.extra_zones[0][0]["position"] = 7
+    serve()
+
+    config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    child = dr.async_get(hass).async_get_child_device_by_identifier(
+        (DOMAIN, f"{SERIAL}_zone1"), config_entry.entry_id
+    )
+    assert child.name == "Zone 1"
 
 
 async def test_zone_devices_become_child_devices(

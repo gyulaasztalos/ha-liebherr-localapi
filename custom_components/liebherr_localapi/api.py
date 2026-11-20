@@ -71,7 +71,7 @@ class LiebherrClient:
                     return response
             except (aiohttp.ClientError, TimeoutError) as err:
                 raise LiebherrConnectionError(
-                    f"{method} /{path}: {err or type(err).__name__}"
+                    f"{method} /{path}: {str(err) or type(err).__name__}"
                 ) from err
 
     async def get(self, path: str) -> dict[str, Any]:
@@ -80,9 +80,12 @@ class LiebherrClient:
         if response.status != 200:
             raise LiebherrResponseError("GET", path, response.status)
         try:
-            return await response.json(content_type=None)
+            data = await response.json(content_type=None)
         except ValueError as err:
             raise LiebherrError(f"GET /{path}: invalid JSON") from err
+        if not isinstance(data, dict):
+            raise LiebherrError(f"GET /{path}: expected a JSON object")
+        return data
 
     async def put(self, path: str, body: dict[str, Any]) -> None:
         """PUT a JSON body."""
@@ -97,10 +100,17 @@ class LiebherrClient:
             raise LiebherrResponseError("DELETE", path, response.status)
 
     async def allowed_methods(self, path: str) -> frozenset[str]:
-        """Return the methods the firmware registers for a route."""
+        """Return the methods the firmware registers for a route.
+
+        404 means the route is not registered on this firmware. Any other error
+        (e.g. 504 while the appliance bus starts up) is raised, so setup retries
+        instead of leaving out the controls for that route until a reload.
+        """
         response = await self._request("OPTIONS", path)
-        if response.status != 200:
+        if response.status in (404, 405):
             return frozenset()
+        if response.status != 200:
+            raise LiebherrResponseError("OPTIONS", path, response.status)
         allow = response.headers.get("Allow", "")
         return frozenset(m.strip().upper() for m in allow.split(",") if m.strip())
 

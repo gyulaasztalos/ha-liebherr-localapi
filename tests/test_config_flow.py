@@ -81,6 +81,22 @@ async def test_user_flow_invalid_response(
     assert result["errors"] == {"base": "invalid_response"}
 
 
+async def test_user_flow_non_object_response(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A host that answers with JSON that is not an object shows invalid_response."""
+    aioclient_mock.get(f"{BASE_URL}/appliance/info", json=[])
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], USER_INPUT
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "invalid_response"}
+
+
 async def test_user_flow_already_configured(
     hass: HomeAssistant, config_entry: MockConfigEntry, serve
 ) -> None:
