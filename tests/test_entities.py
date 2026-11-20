@@ -54,11 +54,11 @@ async def test_sensor_values(hass: HomeAssistant) -> None:
     assert temperature.attributes["unit_of_measurement"] == "°C"
     assert temperature.attributes["state_class"] == "measurement"
 
-    # Alarm level = setpoint 5 + limit 8 / setpoint 5 - limit 2
+    # The limits are the alarm temperatures themselves (setpoint 5 ± 3)
     high = hass.states.get(f"sensor.{PREFIX}_high_temperature_alarm_threshold")
     low = hass.states.get(f"sensor.{PREFIX}_low_temperature_alarm_threshold")
-    assert float(high.state) == 13
-    assert float(low.state) == 3
+    assert float(high.state) == 8
+    assert float(low.state) == 2
     assert hass.states.get(f"sensor.{PREFIX}_failure_codes").state == "none"
     assert hass.states.get(f"binary_sensor.{PREFIX}_door").state == STATE_OFF
     assert hass.states.get(f"binary_sensor.{PREFIX}_cooling").state == STATE_ON

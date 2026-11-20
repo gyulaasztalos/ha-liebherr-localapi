@@ -25,15 +25,6 @@ from .coordinator import LiebherrConfigEntry
 from .entity import LiebherrEntity, dig, supported
 
 
-def _threshold(state: dict[str, Any], side: str) -> float | None:
-    """Alarm level = setpoint + upper limit, or setpoint - lower limit."""
-    setpoint = dig(state, "temperature", "setpoint")
-    limit = dig(state, "temperatureAlarm", side, "limit")
-    if setpoint is None or limit is None:
-        return None
-    return setpoint + limit if side == "upper" else setpoint - limit
-
-
 @dataclass(frozen=True, kw_only=True)
 class LiebherrSensorDescription(SensorEntityDescription):
     """Sensor bound to a state field."""
@@ -77,7 +68,10 @@ SENSORS: tuple[LiebherrSensorDescription, ...] = (
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
         temperature=True,
-        value_fn=lambda s: _threshold(s, "upper"),
+        # The alarm temperature itself. The appliance menu takes the limit as an
+        # offset from the setpoint, but the API reports the resulting temperature
+        # (it moves with the setpoint).
+        value_fn=lambda s: dig(s, "temperatureAlarm", "upper", "limit"),
     ),
     LiebherrSensorDescription(
         key="lower_alarm_threshold",
@@ -87,7 +81,7 @@ SENSORS: tuple[LiebherrSensorDescription, ...] = (
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
         temperature=True,
-        value_fn=lambda s: _threshold(s, "lower"),
+        value_fn=lambda s: dig(s, "temperatureAlarm", "lower", "limit"),
     ),
     LiebherrSensorDescription(
         key="upper_alarm_delay",

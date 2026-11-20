@@ -79,6 +79,10 @@ under HACCP. Read freely, and never PUT/DELETE against it without the owner's go
 - `temperature.displayed` is the **display** value: 1/16 °C steps, it converges to the
   setpoint (τ ≈ 9 min) and holds there; it does not show door openings. It is not the
   air temperature. SuperCool drives it to the zone's minimum (−5 °C).
+- `temperatureAlarm.{upper,lower}.limit` are the alarm **temperatures**, not offsets.
+  The appliance menu (Settings → Alarms) takes them as an offset from the setpoint
+  (factory ±3 K) and the absolute limit moves with the setpoint: setpoint 5 → 8/2,
+  setpoint 3 → 6/0. The threshold sensors report them as is.
 - The physical appliance can have features its caps deny (SuperCool, humidity fan,
   light). Check routes and ask the owner before calling a feature unsupported.
 
