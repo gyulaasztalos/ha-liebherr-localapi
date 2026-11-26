@@ -1,14 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
   ],
   "timezone": "Europe/Budapest",
   "automergeSchedule": [
     "after 5am and before 4pm every weekday",
     "every weekend"
   ],
-  "platformAutomerge": true,
+  "platformAutomerge": false,
   "packageRules": [
     {
       "description": "Minor, patch, pin and digest updates merge themselves once Tests and Validate pass; majors stay PR-only",
@@ -21,14 +22,15 @@
       "automerge": true
     },
     {
-      "description": "Bundle GitHub Actions updates into one PR",
+      "description": "Bundle GitHub Actions updates into one PR that merges itself, majors included",
       "matchManagers": [
         "github-actions"
       ],
       "matchDepTypes": [
         "action"
       ],
-      "groupName": "GitHub Actions"
+      "groupName": "GitHub Actions",
+      "automerge": true
     },
     {
       "description": "The CI Python version should follow Home Assistant's runtime, so review it by hand",
