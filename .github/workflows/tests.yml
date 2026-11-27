@@ -45,7 +45,7 @@ jobs:
         with:
           persist-credentials: false
       # Third-party action, so pinned by commit; Renovate updates SHA and comment
-      - uses: Booyaka101/hass-breakage-radar@95be4d1f05e77056bc536294fd91d790d5026328 # v1.20.0
+      - uses: Booyaka101/hass-breakage-radar@5d646e2d6a912568ea0bcf66ef7b83025f0a4b88 # v1.21.0
         with:
           fail-on: any
           python-version: "3.14"
